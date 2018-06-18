@@ -373,7 +373,6 @@ template<typename MatrixType> void cholesky_definiteness(const MatrixType& m)
     VERIFY(ldlt.info()==Success);
     VERIFY(!ldlt.isNegative());
     VERIFY(!ldlt.isPositive());
-    VERIFY_IS_APPROX(mat,ldlt.reconstructedMatrix());
   }
   {
     mat << 1, 2, 2, 1;
@@ -381,7 +380,6 @@ template<typename MatrixType> void cholesky_definiteness(const MatrixType& m)
     VERIFY(ldlt.info()==Success);
     VERIFY(!ldlt.isNegative());
     VERIFY(!ldlt.isPositive());
-    VERIFY_IS_APPROX(mat,ldlt.reconstructedMatrix());
   }
   {
     mat << 0, 0, 0, 0;
@@ -389,7 +387,6 @@ template<typename MatrixType> void cholesky_definiteness(const MatrixType& m)
     VERIFY(ldlt.info()==Success);
     VERIFY(ldlt.isNegative());
     VERIFY(ldlt.isPositive());
-    VERIFY_IS_APPROX(mat,ldlt.reconstructedMatrix());
   }
   {
     mat << 0, 0, 0, 1;
@@ -397,7 +394,6 @@ template<typename MatrixType> void cholesky_definiteness(const MatrixType& m)
     VERIFY(ldlt.info()==Success);
     VERIFY(!ldlt.isNegative());
     VERIFY(ldlt.isPositive());
-    VERIFY_IS_APPROX(mat,ldlt.reconstructedMatrix());
   }
   {
     mat << -1, 0, 0, 0;
@@ -405,7 +401,6 @@ template<typename MatrixType> void cholesky_definiteness(const MatrixType& m)
     VERIFY(ldlt.info()==Success);
     VERIFY(ldlt.isNegative());
     VERIFY(!ldlt.isPositive());
-    VERIFY_IS_APPROX(mat,ldlt.reconstructedMatrix());
   }
 }
 
@@ -453,18 +448,6 @@ void cholesky_faillure_cases()
             0, 0, 0, 2.00333, 0, 4.24667, 0, 0,
             1, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 1, 0, 0, 0;
-    ldlt.compute(mat);
-    VERIFY(ldlt.info()==NumericalIssue);
-    VERIFY_IS_NOT_APPROX(mat,ldlt.reconstructedMatrix());
-  }
-
-  // bug 1479
-  {
-    mat.resize(4,4);
-    mat <<  1, 2, 0, 1,
-            2, 4, 0, 2,
-            0, 0, 0, 1,
-            1, 2, 1, 1;
     ldlt.compute(mat);
     VERIFY(ldlt.info()==NumericalIssue);
     VERIFY_IS_NOT_APPROX(mat,ldlt.reconstructedMatrix());

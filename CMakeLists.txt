@@ -28,7 +28,7 @@ endif()
 
 
 #############################################################################
-# retrieve version information                                               #
+# retrieve version infomation                                               #
 #############################################################################
 
 # automatically parse the version number
@@ -232,10 +232,7 @@ if(NOT MSVC)
 
   option(EIGEN_TEST_AVX512 "Enable/Disable AVX512 in tests/examples" OFF)
   if(EIGEN_TEST_AVX512)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx512f -DEIGEN_ENABLE_AVX512")
-    if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fabi-version=6")
-    endif()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx512f -fabi-version=6 -DEIGEN_ENABLE_AVX512")
     message(STATUS "Enabling AVX512 in tests/examples")
   endif()
 
@@ -274,15 +271,9 @@ if(NOT MSVC)
     message(STATUS "Enabling NEON in tests/examples")
   endif()
 
-  option(EIGEN_TEST_Z13 "Enable/Disable S390X(zEC13) ZVECTOR in tests/examples" OFF)
-  if(EIGEN_TEST_Z13)
+  option(EIGEN_TEST_ZVECTOR "Enable/Disable S390X(zEC13) ZVECTOR in tests/examples" OFF)
+  if(EIGEN_TEST_ZVECTOR)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=z13 -mzvector")
-    message(STATUS "Enabling S390X(zEC13) ZVECTOR in tests/examples")
-  endif()
-
-  option(EIGEN_TEST_Z14 "Enable/Disable S390X(zEC14) ZVECTOR in tests/examples" OFF)
-  if(EIGEN_TEST_Z14)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=z14 -mzvector")
     message(STATUS "Enabling S390X(zEC13) ZVECTOR in tests/examples")
   endif()
 
@@ -425,15 +416,16 @@ add_subdirectory(Eigen)
 
 add_subdirectory(doc EXCLUDE_FROM_ALL)
 
-option(BUILD_TESTING "Enable creation of Eigen tests." ON)
-if(BUILD_TESTING)
-  include(EigenConfigureTesting)
+include(EigenConfigureTesting)
 
-  if(EIGEN_LEAVE_TEST_IN_ALL_TARGET)
-    add_subdirectory(test) # can't do EXCLUDE_FROM_ALL here, breaks CTest
-  else()
-    add_subdirectory(test EXCLUDE_FROM_ALL)
-  endif()
+# fixme, not sure this line is still needed:
+enable_testing() # must be called from the root CMakeLists, see man page
+
+
+if(EIGEN_LEAVE_TEST_IN_ALL_TARGET)
+  add_subdirectory(test) # can't do EXCLUDE_FROM_ALL here, breaks CTest
+else()
+  add_subdirectory(test EXCLUDE_FROM_ALL)
 endif()
 
 if(EIGEN_LEAVE_TEST_IN_ALL_TARGET)
@@ -446,17 +438,10 @@ endif()
 
 # add SYCL
 option(EIGEN_TEST_SYCL "Add Sycl support." OFF)
-option(EIGEN_SYCL_TRISYCL "Use the triSYCL Sycl implementation (ComputeCPP by default)." OFF)
 if(EIGEN_TEST_SYCL)
   set (CMAKE_MODULE_PATH "${CMAKE_ROOT}/Modules" "cmake/Modules/" "${CMAKE_MODULE_PATH}")
-  if(EIGEN_SYCL_TRISYCL)
-    message(STATUS "Using triSYCL")
-    include(FindTriSYCL)
-  else(EIGEN_SYCL_TRISYCL)
-    message(STATUS "Using ComputeCPP SYCL")
-    include(FindComputeCpp)
-  endif(EIGEN_SYCL_TRISYCL)
-endif(EIGEN_TEST_SYCL)
+  include(FindComputeCpp)
+endif()
 
 add_subdirectory(unsupported)
 
@@ -476,9 +461,7 @@ endif(NOT WIN32)
 
 configure_file(scripts/cdashtesting.cmake.in cdashtesting.cmake @ONLY)
 
-if(BUILD_TESTING)
-  ei_testing_print_summary()
-endif()
+ei_testing_print_summary()
 
 message(STATUS "")
 message(STATUS "Configured Eigen ${EIGEN_VERSION_NUMBER}")
